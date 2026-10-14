@@ -6,7 +6,7 @@
     },
     "exported_at": "2026-10-14T00:00:00+02:00",
     "name": "Among Us - Impostor (Drama Afera League Server)",
-    "author": "townofus-pl",
+    "author": "noreply@townofus.pl",
     "description": "Impostor with the Reactor.Impostor plugin, for Town of Us (TOU-Mira) league matches.\n\nImpostor and the plugin ship inside the image ghcr.io/townofus-pl/impostor. Wings pulls the image on every start, so a restart deploys the latest :league build.\n\nAllocations: the primary allocation is the game port (UDP). A second allocation is the HTTP matchmaker port (HTTP_PORT). Put a TLS reverse proxy in front of it: Among Us accepts only an HTTPS matchmaker.\n\nSource: https://github.com/townofus-pl/impostor-egg",
     "features": null,
     "docker_images": {
