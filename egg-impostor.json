@@ -1,0 +1,52 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2026-10-14T00:00:00+02:00",
+    "name": "Among Us - Impostor (Drama Afera League Server)",
+    "author": "townofus-pl",
+    "description": "Impostor with the Reactor.Impostor plugin, for Town of Us (TOU-Mira) league matches.\n\nImpostor and the plugin ship inside the image ghcr.io/townofus-pl/impostor. Wings pulls the image on every start, so a restart deploys the latest :league build.\n\nAllocations: the primary allocation is the game port (UDP). A second allocation is the HTTP matchmaker port (HTTP_PORT). Put a TLS reverse proxy in front of it: Among Us accepts only an HTTPS matchmaker.\n\nSource: https://github.com/townofus-pl/impostor-egg",
+    "features": null,
+    "docker_images": {
+        "League": "ghcr.io/townofus-pl/impostor:league"
+    },
+    "file_denylist": [],
+    "startup": "env IMPOSTOR_Server__PublicIp=${PUBLIC_IP:-$SERVER_IP} IMPOSTOR_Server__PublicPort={{SERVER_PORT}} IMPOSTOR_Server__ListenPort={{SERVER_PORT}} IMPOSTOR_HttpServer__ListenPort={{HTTP_PORT}} /opt/impostor/Impostor.Server",
+    "config": {
+        "files": "{}",
+        "startup": "{\"done\": \"Matchmaker is listening on\"}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!/bin/bash\n# Impostor and Reactor.Impostor ship inside the server image (ghcr.io/townofus-pl/impostor).\n# There is nothing to download. A reinstall only makes sure the server folder exists.\nmkdir -p /mnt/server\necho \"Nothing to install: Impostor ships in the image. Update by restarting the server.\"\n",
+            "container": "debian:bookworm-slim",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "HTTP port",
+            "description": "Port of the HTTP matchmaker. Use the second allocation of this server. The TLS reverse proxy forwards to it.",
+            "env_variable": "HTTP_PORT",
+            "default_value": "22024",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65535",
+            "field_type": "text"
+        },
+        {
+            "name": "Public IP",
+            "description": "IP or DNS-only hostname that players use for game traffic (UDP). Leave empty to use the IP of the primary allocation.",
+            "env_variable": "PUBLIC_IP",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "nullable|string|max:255",
+            "field_type": "text"
+        }
+    ]
+}

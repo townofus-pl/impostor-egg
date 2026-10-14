@@ -1,0 +1,70 @@
+name: Check for new versions
+
+# Once a week: if Impostor or Reactor.Impostor has a newer release than the Dockerfile pins,
+# open a PR that bumps the pin. Merging the PR deploys it (see build.yml).
+
+on:
+  schedule:
+    - cron: "0 7 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compare pinned and latest versions
+        id: versions
+        run: |
+          set -euo pipefail
+          pinned_impostor=$(sed -n 's/^ARG IMPOSTOR_VERSION=//p' Dockerfile)
+          pinned_reactor=$(sed -n 's/^ARG REACTOR_IMPOSTOR_VERSION=//p' Dockerfile)
+          latest_impostor=$(gh release view -R Impostor/Impostor --json tagName -q .tagName)
+          latest_reactor=$(gh release view -R NuclearPowered/Reactor.Impostor --json tagName -q .tagName)
+          echo "Impostor: pinned $pinned_impostor, latest $latest_impostor"
+          echo "Reactor.Impostor: pinned $pinned_reactor, latest $latest_reactor"
+          {
+            echo "impostor=$latest_impostor"
+            echo "reactor=$latest_reactor"
+            if [ "$pinned_impostor" = "$latest_impostor" ] && [ "$pinned_reactor" = "$latest_reactor" ]; then
+              echo "changed=false"
+            else
+              echo "changed=true"
+            fi
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Open a bump PR
+        if: steps.versions.outputs.changed == 'true'
+        env:
+          IMPOSTOR: ${{ steps.versions.outputs.impostor }}
+          REACTOR: ${{ steps.versions.outputs.reactor }}
+        run: |
+          set -euo pipefail
+          branch="bump/impostor-${IMPOSTOR}-reactor-${REACTOR}"
+          if git ls-remote --exit-code --heads origin "$branch" >/dev/null; then
+            echo "Branch $branch already exists, nothing to do."
+            exit 0
+          fi
+          sed -i "s/^ARG IMPOSTOR_VERSION=.*/ARG IMPOSTOR_VERSION=${IMPOSTOR}/" Dockerfile
+          sed -i "s/^ARG REACTOR_IMPOSTOR_VERSION=.*/ARG REACTOR_IMPOSTOR_VERSION=${REACTOR}/" Dockerfile
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$branch"
+          git commit -am "chore: Impostor ${IMPOSTOR}, Reactor.Impostor ${REACTOR}"
+          git push -u origin "$branch"
+          gh pr create --base main --head "$branch" \
+            --title "Impostor ${IMPOSTOR}, Reactor.Impostor ${REACTOR}" \
+            --body "New upstream release. Check the release notes, then merge. The League Server picks up \`:league\` on its next restart.
+
+          - Impostor: https://github.com/Impostor/Impostor/releases/tag/${IMPOSTOR}
+          - Reactor.Impostor: https://github.com/NuclearPowered/Reactor.Impostor/releases/tag/${REACTOR}"
+          # A push made with GITHUB_TOKEN does not start other workflows, so start the build by hand.
+          gh workflow run build.yml --ref "$branch"
