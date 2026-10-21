@@ -29,6 +29,18 @@ Among Us accepts only an HTTPS matchmaker, and Impostor has no TLS. Put a revers
 4. Start the server. The log must show `Enabling plugin gg.reactor.impostor`.
 5. Add a schedule that restarts the server every day, outside league nights. The restart deploys new builds.
 
+## Add a plugin
+
+Impostor loads plugins from two places: `/opt/impostor/plugins` in the image (Reactor.Impostor) and `plugins/` on the server volume. The entrypoint makes `plugins/` and `libraries/` on each start.
+
+1. Stop the server.
+2. In the panel file manager, upload the plugin DLL to `plugins/`.
+3. If the plugin needs other DLLs, upload them to `libraries/`.
+4. Upload the plugin config file, if it has one, to the server root.
+5. Start the server. The log must show `Enabling plugin <plugin id>`.
+
+To remove a plugin, delete its DLL and restart. An image update does not change the volume, so update a volume plugin by hand. Do not upload a plugin that is already in the image.
+
 ## Updates
 
 1. Every Monday the "Check for new versions" workflow compares the pins with the latest releases.
