@@ -34,7 +34,8 @@ LABEL org.opencontainers.image.source="https://github.com/townofus-pl/impostor-e
 
 COPY --from=download /opt/impostor /opt/impostor
 
-# Plugins live in the image, not on the server volume, so an image update also updates them.
+# The base plugins live in the image, so an image update also updates them. Impostor also loads
+# extra plugins from plugins/ and libraries/ on the server volume (README, "Add a plugin").
 # AntiCheat: ADR 0001. Changing it is a decision, so it lives here and not in a panel variable.
 ENV IMPOSTOR_ENV=Production \
     IMPOSTOR_PluginLoader__Paths__0=/opt/impostor/plugins \

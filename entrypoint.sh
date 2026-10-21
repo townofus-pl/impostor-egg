@@ -4,6 +4,10 @@
 set -e
 cd /home/container
 
+# Impostor also loads plugins from ./plugins and ./libraries in its working directory, here the
+# server volume. Make the folders, so they show in the panel file manager for uploads.
+mkdir -p plugins libraries || echo "Could not make plugins/ and libraries/. Volume plugins are off."
+
 MODIFIED_STARTUP=$(echo -e "${STARTUP}" | sed -e 's/{{/${/g' -e 's/}}/}/g')
 echo ":/home/container$ ${MODIFIED_STARTUP}"
 
