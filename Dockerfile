@@ -1,7 +1,7 @@
 # Impostor + Reactor.Impostor for the Drama Afera League Server, as a Pterodactyl yolk.
 # Wings pulls this image on every server start, so a new :league tag deploys on the next restart.
 
-ARG IMPOSTOR_VERSION=v1.10.9
+ARG IMPOSTOR_VERSION=v1.10.10
 ARG REACTOR_IMPOSTOR_VERSION=2.2.0
 
 FROM --platform=$BUILDPLATFORM debian:bookworm-slim AS download
