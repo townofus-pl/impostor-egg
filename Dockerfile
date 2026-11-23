@@ -26,7 +26,7 @@ RUN set -eu; \
     chmod -R a+rX /opt/impostor; \
     chmod 755 Impostor.Server
 
-FROM mcr.microsoft.com/dotnet/aspnet:10.0
+FROM mcr.microsoft.com/dotnet/aspnet:10.0-noble
 ARG IMPOSTOR_VERSION
 ARG REACTOR_IMPOSTOR_VERSION
 LABEL org.opencontainers.image.source="https://github.com/townofus-pl/impostor-egg" \
